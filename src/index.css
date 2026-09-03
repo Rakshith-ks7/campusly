@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary-red: #E63946;
+    --primary-red-hover: #D62839;
+    --light-red: #F87171;
+    --pink-very-light: #FFF1F2;
+    --pink-soft: #FFE4E6;
+    --bg-canvas: #FFF8F8;
+    --bg-white: #FFFFFF;
+    --text-main: #262626;
+    --text-secondary: #666666;
+    --border-subtle: #E5E5E5;
+    --border-pink: #FECDD3;
+  }
+
+  body {
+    background-color: #FFF8F8;
+    color: #262626;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4, .font-heading {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #262626;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* Clean, friendly white cards with subtle light-gray borders */
+.surface-panel,
+.card-base {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.surface-interactive {
+  background: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.surface-interactive:hover {
+  border-color: #FECDD3;
+  box-shadow: 0 4px 12px -2px rgba(230, 57, 70, 0.06);
+}
+
+/* Soft pink skill chips */
+.skill-tag,
+.tech-tag {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #FFE4E6;
+  background-color: #FFF1F2;
+  color: #E63946;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #E63946;
+  color: #FFFFFF;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-primary:hover {
+  background-color: #D62839;
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: #E63946;
+  border: 1px solid #E5E5E5;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-secondary:hover {
+  background-color: #FFF1F2;
+  border-color: #FECDD3;
+}
+
+/* Clean custom scrollbar for light background */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FFF8F8;
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E5E5;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #D4D4D4;
+}

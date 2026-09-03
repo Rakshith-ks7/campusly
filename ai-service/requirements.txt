@@ -1,0 +1,8 @@
+fastapi>=0.110.0
+uvicorn>=0.29.0
+pydantic>=2.7.0
+numpy>=1.26.0
+# For CPU or CUDA PyTorch:
+# pip install torch --index-url https://download.pytorch.org/whl/cu121 (for CUDA)
+# pip install torch (for CPU)
+torch>=2.2.0
