@@ -45,12 +45,12 @@ export const CommunityCard: React.FC<Props> = ({ community, className = '' }) =>
             alt={`${community.name} community`}
             loading="lazy"
             onError={() => setImageError(true)}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
           />
         ) : (
           /* Safe Fallback: Soft pink placeholder + Category Icon */
           <div className="w-full h-full bg-[#FFF1F2] border-b border-[#FFE4E6] flex flex-col items-center justify-center p-4 text-center">
-            <div className="w-12 h-12 rounded-2xl bg-white border border-[#FFE4E6] flex items-center justify-center text-2xl shadow-xs mb-1 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-2xl bg-white border border-[#FFE4E6] flex items-center justify-center text-2xl shadow-xs mb-1 group-hover:scale-[1.03] transition-transform duration-200">
               {fallbackEmoji}
             </div>
           </div>

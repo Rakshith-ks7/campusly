@@ -10,8 +10,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { PublicOnlyRoute } from './components/PublicOnlyRoute';
 
 // Global Components
-import { PersonaSwitcher } from './components/PersonaSwitcher';
 import { Navbar } from './components/Navbar';
+import { BottomNavigation } from './components/BottomNavigation';
 import { MatchingWeightsDrawer } from './components/MatchingWeightsDrawer';
 import { CreateProjectModal } from './components/CreateProjectModal';
 import { AuthModal } from './components/AuthModal';
@@ -52,10 +52,9 @@ import { Heart } from 'lucide-react';
 const AppContent: React.FC = () => {
   const { currentUser: fbUser, studentProfile } = useAuth();
   
-  // Local state fallback or active student
-  const [currentUser, setCurrentUser] = useState<StudentProfile>(
-    studentProfile || dataService.getCurrentUser()
-  );
+  // Real authenticated student profile from AuthContext
+  const fallbackUser = dataService.getCurrentUser();
+  const [currentUser, setCurrentUser] = useState<StudentProfile>(studentProfile || fallbackUser);
   const [weights, setWeights] = useState<MatchingWeights>(DEFAULT_WEIGHTS);
   
   // Sync when studentProfile updates from AuthProvider
@@ -70,16 +69,6 @@ const AppContent: React.FC = () => {
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  const handleUserChange = (user: StudentProfile) => {
-    setCurrentUser(user);
-  };
-
-  const handleDataReset = () => {
-    dataService.resetToFactoryDefaults();
-    setCurrentUser(dataService.getCurrentUser());
-    setWeights(DEFAULT_WEIGHTS);
-  };
-
   const handleProjectCreated = (_project: Project) => {
     // Handled in service
   };
@@ -87,13 +76,6 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#FFF8F8] text-[#262626] flex flex-col selection:bg-[#FFE4E6] selection:text-[#E63946] font-['Inter',sans-serif]">
       
-      {/* Top Persona Switcher Bar */}
-      <PersonaSwitcher
-        currentUser={currentUser}
-        onUserChange={handleUserChange}
-        onDataReset={handleDataReset}
-      />
-
       {/* Navigation Header */}
       <Navbar
         currentUser={currentUser}
@@ -102,7 +84,7 @@ const AppContent: React.FC = () => {
       />
 
       {/* Main Routed Content */}
-      <main className="flex-1">
+      <main className="flex-1 pb-20 md:pb-0">
         <Routes>
           
           {/* Public Auth Routes */}
@@ -225,6 +207,17 @@ const AppContent: React.FC = () => {
             } 
           />
           <Route 
+            path="/profile/:userId" 
+            element={
+              <ProtectedRoute>
+                <ProfilePage 
+                  currentUser={currentUser} 
+                  onProfileUpdated={(updated) => setCurrentUser(updated)} 
+                />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/settings" 
             element={
               <ProtectedRoute>
@@ -287,7 +280,7 @@ const AppContent: React.FC = () => {
       <CampusAlertPopup />
 
       {/* Clean Student-Friendly Footer */}
-      <footer className="bg-white border-t border-[#E5E5E5] py-8 px-4 sm:px-6">
+      <footer className="bg-white border-t border-[#E5E5E5] py-8 pb-24 md:pb-8 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <img
@@ -319,6 +312,12 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       </footer>
+      
+      {/* Fixed Mobile Bottom Navigation */}
+      <BottomNavigation
+        currentUser={currentUser}
+        onCreateProjectClick={() => setCreateProjectOpen(true)}
+      />
 
     </div>
   );

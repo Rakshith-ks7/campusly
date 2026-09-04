@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { StudentProfile, MatchingWeights } from '../types';
 import { dataService } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { calculateStudentMatch } from '../services/matchingAlgorithm';
 import { 
   Search, 
@@ -48,9 +49,35 @@ export const StudentDirectoryPage: React.FC<Props> = ({
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedStudentForMessage, setSelectedStudentForMessage] = useState<StudentProfile | null>(null);
 
+  // Real Firestore students
+  const [allStudents, setAllStudents] = useState<StudentProfile[]>([]);
+  const [isLoadingStudents, setIsLoadingStudents] = useState(true);
+
   useEffect(() => {
-    followService.getFollowingList(currentUser.id).then(setFollowingIds);
-  }, [currentUser.id]);
+    let isMounted = true;
+    setIsLoadingStudents(true);
+    firestoreService.getAllStudents()
+      .then(students => {
+        if (isMounted) {
+          setAllStudents(students);
+          setIsLoadingStudents(false);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching students for directory:', err);
+        if (isMounted) {
+          setAllStudents([]);
+          setIsLoadingStudents(false);
+        }
+      });
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      followService.getFollowingList(currentUser.id).then(setFollowingIds);
+    }
+  }, [currentUser?.id]);
 
   const handleToggleFollow = async (targetStudent: StudentProfile) => {
     const isCurrentlyFollowing = followingIds.includes(targetStudent.id);
@@ -69,7 +96,6 @@ export const StudentDirectoryPage: React.FC<Props> = ({
     }
   }, [searchParams]);
 
-  const allStudents = dataService.getAllStudents();
   const allProjects = dataService.getAllProjects();
   const myProjects = allProjects.filter(p => p.creatorId === currentUser.id);
 
@@ -287,7 +313,23 @@ export const StudentDirectoryPage: React.FC<Props> = ({
       </div>
 
       {/* Students Cards Grid */}
-      {studentsWithScores.length === 0 ? (
+      {isLoadingStudents ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="bg-white border border-[#E5E5E5] rounded-xl p-5 shadow-xs animate-pulse space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 rounded-full bg-rose-100 shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <div className="h-4 bg-rose-100 rounded w-28" />
+                  <div className="h-3 bg-rose-50 rounded w-20" />
+                </div>
+              </div>
+              <div className="h-10 bg-rose-50 rounded-xl" />
+              <div className="h-8 bg-rose-100 rounded-xl" />
+            </div>
+          ))}
+        </div>
+      ) : studentsWithScores.length === 0 ? (
         <div className="bg-white border border-[#E5E5E5] rounded-xl p-12 text-center space-y-3">
           <h3 className="font-heading font-semibold text-lg text-[#262626]">No teammates found</h3>
           <p className="text-sm text-[#666666]">Try changing your search keywords or clearing some filters.</p>
@@ -308,7 +350,7 @@ export const StudentDirectoryPage: React.FC<Props> = ({
               <div>
                 {/* Profile Head */}
                 <div className="flex items-start justify-between gap-3 mb-3">
-                  <div className="flex items-start gap-3">
+                  <Link to={`/profile/${student.id}`} className="flex items-start gap-3 hover:opacity-85 transition">
                     <img
                       src={student.avatar}
                       alt={student.name}
@@ -326,7 +368,7 @@ export const StudentDirectoryPage: React.FC<Props> = ({
                         <span className="truncate max-w-[140px]">{student.college}</span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
 
                   <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#FFF1F2] text-[#E63946] border border-[#FFE4E6] shrink-0">
                     {match.overallMatch}% Match

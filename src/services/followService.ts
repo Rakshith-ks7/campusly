@@ -8,7 +8,7 @@ import {
   getDocs 
 } from './firebase';
 import { FollowStats, StudentProfile } from '../types';
-import { dataService } from './dataService';
+import { firestoreService } from './firestoreService';
 
 // LocalStorage cache key prefix for instantaneous UI feedback & offline resilience
 const FOLLOW_STORAGE_PREFIX = 'campusly_following_';
@@ -28,6 +28,7 @@ export class FollowService {
    * Creates:
    * 1. students/{currentUid}/following/{targetUid}
    * 2. students/{targetUid}/followers/{currentUid}
+   * 3. students/{targetUid}/notifications (via Firestore)
    */
   public async followUser(
     currentUid: string,
@@ -60,13 +61,13 @@ export class FollowService {
         createdAt: now
       }, { merge: true });
 
-      // 3. Send Notification to target student
+      // 3. Send real Firestore notification to target student
       const senderName = currentStudent?.name || 'A student';
-      dataService.addNotification({
-        studentId: targetUid,
+      await firestoreService.sendNotification(targetUid, {
+        actorUid: currentUid,
         title: 'New Follower! 👤',
         message: `${senderName} started following your profile on Campusly.`,
-        link: `/profile`,
+        link: `/profile/${currentUid}`,
         type: 'connection'
       });
 
@@ -144,7 +145,7 @@ export class FollowService {
   }
 
   /**
-   * Get followers and following counts for a user
+   * Get followers and following counts for a user from real Firestore subcollections
    */
   public async getFollowStats(uid: string): Promise<FollowStats> {
     if (!uid) return { followersCount: 0, followingCount: 0 };
@@ -160,10 +161,9 @@ export class FollowService {
 
       return { followersCount, followingCount };
     } catch (err) {
-      // Fallback to local cache approximation
       const cachedFollowing = this.getLocalFollowing(uid);
       return {
-        followersCount: Math.max(1, Math.floor(Math.random() * 5)),
+        followersCount: 0,
         followingCount: cachedFollowing.length
       };
     }

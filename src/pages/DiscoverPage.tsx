@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
+import { useAuth } from '../context/AuthContext';
 import { UniversalSearchResult } from '../types';
 import { 
   Search, 
@@ -21,28 +23,51 @@ import { CreateHubModal } from '../components/CreateHubModal';
 import { CommunityCard } from '../components/CommunityCard';
 
 export const DiscoverPage: React.FC = () => {
+  const { studentProfile } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryParam = searchParams.get('q') || '';
   const [query, setQuery] = useState(queryParam);
   const [activeTab, setActiveTab] = useState<'all' | 'students' | 'projects' | 'events' | 'communities' | 'study'>('all');
   const [searchResults, setSearchResults] = useState<UniversalSearchResult | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const [isCreateHubOpen, setIsCreateHubOpen] = useState(false);
   const [allCommunities, setAllCommunities] = useState(dataService.getAllCommunities());
+
+  const executeSearch = async (searchTerm: string) => {
+    if (!searchTerm.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    setIsSearching(true);
+    const localMatches = dataService.universalSearch(searchTerm);
+    try {
+      const realStudents = await firestoreService.searchStudents(searchTerm, studentProfile?.id);
+      setSearchResults({
+        ...localMatches,
+        students: realStudents
+      });
+    } catch (err) {
+      console.error('Error querying students for discover search:', err);
+      setSearchResults(localMatches);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   useEffect(() => {
     if (queryParam) {
       setQuery(queryParam);
-      setSearchResults(dataService.universalSearch(queryParam));
+      executeSearch(queryParam);
     } else {
       setSearchResults(null);
     }
-  }, [queryParam]);
+  }, [queryParam, studentProfile?.id]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       setSearchParams({ q: query.trim() });
-      setSearchResults(dataService.universalSearch(query.trim()));
+      executeSearch(query.trim());
     } else {
       setSearchParams({});
       setSearchResults(null);
@@ -112,12 +137,12 @@ export const DiscoverPage: React.FC = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search across all students, skills, events, notes, communities..."
+              placeholder="Search students, skills, projects or communities..."
               className="w-full bg-transparent text-xs sm:text-sm text-[#262626] focus:outline-none"
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-medium rounded-lg shrink-0 transition"
+              className="px-4 py-2 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-semibold rounded-lg shrink-0 transition"
             >
               Search
             </button>
@@ -210,15 +235,15 @@ export const DiscoverPage: React.FC = () => {
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {searchResults.students.map((s) => (
-                    <div key={s.id} className="p-3.5 bg-white border border-[#E5E5E5] rounded-xl flex items-center justify-between gap-3 shadow-xs">
-                      <div className="flex items-center gap-2.5">
+                    <div key={s.id} className="p-3.5 bg-white border border-[#E5E5E5] hover:border-[#FECDD3] rounded-xl flex items-center justify-between gap-3 shadow-xs transition">
+                      <Link to={`/profile/${s.id}`} className="flex items-center gap-2.5 hover:opacity-85 transition">
                         <img src={s.avatar} alt="" className="w-9 h-9 rounded-full object-cover border border-[#E5E5E5]" />
                         <div>
                           <h4 className="font-semibold text-xs text-[#262626]">{s.name}</h4>
                           <p className="text-[11px] text-[#666666]">{s.department.split('&')[0]} • {s.year}</p>
                         </div>
-                      </div>
-                      <Link to={`/students?q=${encodeURIComponent(s.name)}`} className="text-xs text-[#E63946] font-medium hover:underline">
+                      </Link>
+                      <Link to={`/profile/${s.id}`} className="text-xs text-[#E63946] font-medium hover:underline">
                         Profile →
                       </Link>
                     </div>

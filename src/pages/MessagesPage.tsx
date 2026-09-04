@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { chatService } from '../services/chatService';
 import { followService } from '../services/followService';
 import { dataService } from '../services/dataService';
+import { firestoreService } from '../services/firestoreService';
 import { 
   Search, 
   Send, 
@@ -102,9 +103,21 @@ export const MessagesPage: React.FC = () => {
     ? activeConversation.participantIds.find(id => id !== currentUid)
     : (targetUserParam || (activeConversationId ? activeConversationId.split('_').find(id => id !== currentUid) : null));
 
+  const [firestoreOtherStudent, setFirestoreOtherStudent] = useState<StudentProfile | null>(null);
+
+  useEffect(() => {
+    if (otherParticipantId) {
+      firestoreService.getStudentProfile(otherParticipantId).then(profile => {
+        if (profile) setFirestoreOtherStudent(profile);
+      });
+    } else {
+      setFirestoreOtherStudent(null);
+    }
+  }, [otherParticipantId]);
+
   const allStudents = dataService.getAllStudents();
   const otherStudent = otherParticipantId 
-    ? (allStudents.find(s => s.id === otherParticipantId) || {
+    ? (firestoreOtherStudent || allStudents.find(s => s.id === otherParticipantId) || {
         id: otherParticipantId,
         name: activeConversation?.participantDetails[otherParticipantId]?.name || 'Student',
         avatar: activeConversation?.participantDetails[otherParticipantId]?.avatar || '/avatars/avatar-1.png',
@@ -510,7 +523,7 @@ export const MessagesPage: React.FC = () => {
                   {menuOpen && (
                     <div className="absolute right-0 top-10 w-48 bg-white border border-[#E5E5E5] rounded-2xl shadow-lg py-1.5 z-30 text-xs text-[#262626]">
                       <Link
-                        to={`/students?q=${encodeURIComponent(otherStudent.name)}`}
+                        to={`/profile/${otherStudent.id}`}
                         className="flex items-center gap-2 px-3.5 py-2 hover:bg-[#FFF8F8] text-[#262626]"
                         onClick={() => setMenuOpen(false)}
                       >

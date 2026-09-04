@@ -119,3 +119,77 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #D4D4D4;
 }
+
+/* ======================================================== */
+/* SUBTLE LIVING ANIMATIONS & MICRO-INTERACTIONS            */
+/* ======================================================== */
+@keyframes subtle-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes subtle-float-delayed {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes subtle-pulse-glow {
+  0%, 100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+.animate-subtle-float {
+  animation: subtle-float 3.5s ease-in-out infinite;
+}
+
+.animate-subtle-float-delayed {
+  animation: subtle-float-delayed 4s ease-in-out 1.2s infinite;
+}
+
+.animate-subtle-pulse {
+  animation: subtle-pulse-glow 3s ease-in-out infinite;
+}
+
+/* Micro-interaction card lift */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -2px rgba(230, 57, 70, 0.08);
+  border-color: #FECDD3;
+}
+
+/* Respect user's motion preferences (Accessibility #17) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-subtle-float,
+  .animate-subtle-float-delayed,
+  .animate-subtle-pulse {
+    animation: none !important;
+  }
+  .hover-lift:hover {
+    transform: none !important;
+  }
+}

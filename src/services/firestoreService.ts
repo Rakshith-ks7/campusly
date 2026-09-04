@@ -1,5 +1,17 @@
-import { db, doc, getDoc, setDoc, updateDoc, collection, getDocs } from './firebase';
-import { StudentProfile } from '../types';
+import { 
+  db, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  updateDoc, 
+  collection, 
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  onSnapshot
+} from './firebase';
+import { StudentProfile, NotificationItem } from '../types';
 
 const STUDENTS_COLLECTION = 'students';
 
@@ -14,18 +26,60 @@ export class FirestoreService {
   }
 
   /**
+   * Helper to normalize a Firestore student document into the standard StudentProfile interface
+   */
+  private normalizeStudent(docId: string, d: any): StudentProfile {
+    return {
+      id: d.uid || d.id || docId,
+      name: d.fullName || d.name || 'Campus Student',
+      email: d.email || '',
+      avatar: d.profilePhoto || d.avatar || '/avatars/avatar-1.png',
+      college: d.college || d.university || 'Campus',
+      university: d.university || d.college || 'Campus',
+      department: d.branch || d.department || 'Student',
+      year: d.year || '1st Year',
+      semester: d.semester || '1st Semester',
+      location: d.location || 'Campus',
+      localityRadius: d.localityRadius || 'Same College',
+      bio: d.bio || '',
+      skills: Array.isArray(d.skills) ? d.skills : [],
+      interests: Array.isArray(d.interests) ? d.interests : [],
+      experienceYears: d.experienceYears || 0,
+      availability: d.availability || '10-20 hrs/wk',
+      links: d.links || d.socialLinks || {},
+      reputation: d.reputation || {
+        score: 5.0,
+        reviewCount: 0,
+        completedProjects: 0,
+        hackathonWins: 0,
+        verifiedSkillsCount: 0
+      },
+      lookingFor: Array.isArray(d.lookingFor) ? d.lookingFor : ['Friends', 'Project teammates'],
+      joinedCommunityIds: Array.isArray(d.joinedCommunityIds) ? d.joinedCommunityIds : [],
+      registeredEventIds: Array.isArray(d.registeredEventIds) ? d.registeredEventIds : [],
+      connectionIds: Array.isArray(d.connectionIds) ? d.connectionIds : [],
+      isAdmin: Boolean(d.isAdmin),
+      onboardingCompleted: Boolean(d.onboardingCompleted),
+      isVerifiedStudent: Boolean(d.isVerifiedStudent),
+      createdAt: d.createdAt,
+      updatedAt: d.updatedAt
+    };
+  }
+
+  /**
    * Fetch a single student profile by UID from Firestore
    */
   public async getStudentProfile(uid: string): Promise<StudentProfile | null> {
+    if (!uid) return null;
     try {
       const docRef = doc(db, STUDENTS_COLLECTION, uid);
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
-        return snapshot.data() as StudentProfile;
+        return this.normalizeStudent(snapshot.id, snapshot.data());
       }
       return null;
     } catch (err) {
-      console.warn(`Firestore getStudentProfile fallback for ${uid}:`, err);
+      console.warn(`Firestore getStudentProfile warning for ${uid}:`, err);
       return null;
     }
   }
@@ -41,13 +95,20 @@ export class FirestoreService {
     isVerified: boolean = false
   ): Promise<StudentProfile> {
     const now = new Date().toISOString();
-    const initialProfile: StudentProfile = {
+    const cleanAvatar = avatarUrl || '/avatars/avatar-1.png';
+    const cleanName = name || 'Campus Student';
+
+    const initialData = {
+      uid,
       id: uid,
-      name: name || 'Campus Student',
+      fullName: cleanName,
+      name: cleanName,
       email,
-      avatar: avatarUrl || '/avatars/avatar-1.png',
+      profilePhoto: cleanAvatar,
+      avatar: cleanAvatar,
       college: 'Kishkinda University',
       university: 'Kishkinda University',
+      branch: 'Computer Science & Engineering',
       department: 'Computer Science & Engineering',
       year: '1st Year',
       semester: '1st Semester',
@@ -59,6 +120,7 @@ export class FirestoreService {
       experienceYears: 0,
       availability: '10-20 hrs/wk',
       links: {},
+      socialLinks: {},
       reputation: {
         score: 5.0,
         reviewCount: 0,
@@ -78,12 +140,12 @@ export class FirestoreService {
 
     try {
       const docRef = doc(db, STUDENTS_COLLECTION, uid);
-      await setDoc(docRef, initialProfile, { merge: true });
+      await setDoc(docRef, initialData, { merge: true });
     } catch (err) {
       console.warn('Firestore createInitialStudentProfile warning:', err);
     }
 
-    return initialProfile;
+    return this.normalizeStudent(uid, initialData);
   }
 
   /**
@@ -93,11 +155,27 @@ export class FirestoreService {
     uid: string,
     updates: Partial<StudentProfile>
   ): Promise<void> {
+    if (!uid) return;
     const updatedAt = new Date().toISOString();
-    const dataToUpdate = {
+    
+    // Write dual keys for maximum compatibility
+    const dataToUpdate: any = {
       ...updates,
       updatedAt
     };
+
+    if (updates.name) {
+      dataToUpdate.fullName = updates.name;
+    }
+    if (updates.department) {
+      dataToUpdate.branch = updates.department;
+    }
+    if (updates.avatar) {
+      dataToUpdate.profilePhoto = updates.avatar;
+    }
+    if (updates.college) {
+      dataToUpdate.university = updates.college;
+    }
 
     try {
       const docRef = doc(db, STUDENTS_COLLECTION, uid);
@@ -115,12 +193,112 @@ export class FirestoreService {
       const snapshot = await getDocs(collection(db, STUDENTS_COLLECTION));
       const students: StudentProfile[] = [];
       snapshot.forEach(docSnap => {
-        students.push(docSnap.data() as StudentProfile);
+        students.push(this.normalizeStudent(docSnap.id, docSnap.data()));
       });
       return students;
     } catch (err) {
-      console.warn('Firestore getAllStudents fallback:', err);
-      return [];
+      console.error('Firestore getAllStudents error:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * Search real students in Firestore, excluding current user
+   */
+  public async searchStudents(rawQuery: string, currentUid?: string): Promise<StudentProfile[]> {
+    const queryStr = rawQuery.toLowerCase().trim();
+    const all = await this.getAllStudents();
+    const otherStudents = currentUid ? all.filter(s => s.id !== currentUid) : all;
+    
+    if (!queryStr) return otherStudents;
+
+    return otherStudents.filter(s => 
+      s.name.toLowerCase().includes(queryStr) ||
+      s.department.toLowerCase().includes(queryStr) ||
+      s.college.toLowerCase().includes(queryStr) ||
+      s.skills.some(sk => sk.name.toLowerCase().includes(queryStr)) ||
+      s.interests.some(i => i.toLowerCase().includes(queryStr)) ||
+      (s.lookingFor && s.lookingFor.some(lf => lf.toLowerCase().includes(queryStr)))
+    );
+  }
+
+  /**
+   * Send a notification to a recipient student in Firestore
+   */
+  public async sendNotification(
+    recipientUid: string,
+    notif: {
+      actorUid?: string;
+      title: string;
+      message: string;
+      link: string;
+      type: 'connection' | 'event' | 'project' | 'chat';
+    }
+  ): Promise<void> {
+    if (!recipientUid) return;
+    try {
+      const now = new Date().toISOString();
+      const notifsCol = collection(db, STUDENTS_COLLECTION, recipientUid, 'notifications');
+      const newDoc = doc(notifsCol);
+      await setDoc(newDoc, {
+        id: newDoc.id,
+        studentId: recipientUid,
+        actorUid: notif.actorUid || '',
+        title: notif.title,
+        message: notif.message,
+        link: notif.link,
+        type: notif.type,
+        read: false,
+        createdAt: now,
+        timestamp: 'Just now'
+      });
+    } catch (err) {
+      console.warn(`Firestore sendNotification warning to ${recipientUid}:`, err);
+    }
+  }
+
+  /**
+   * Real-time subscription to notifications for a student
+   */
+  public subscribeToNotifications(
+    studentId: string,
+    callback: (notifications: NotificationItem[]) => void
+  ): () => void {
+    if (!studentId) {
+      callback([]);
+      return () => {};
+    }
+
+    try {
+      const notifsCol = collection(db, STUDENTS_COLLECTION, studentId, 'notifications');
+      const q = query(notifsCol, orderBy('createdAt', 'desc'), limit(40));
+
+      return onSnapshot(q, (snapshot) => {
+        const notifs: NotificationItem[] = [];
+        snapshot.forEach((docSnap) => {
+          notifs.push({ id: docSnap.id, ...docSnap.data() } as NotificationItem);
+        });
+        callback(notifs);
+      }, (err) => {
+        console.warn('Firestore subscribeToNotifications warning:', err);
+        callback([]);
+      });
+    } catch (err) {
+      console.warn('Firestore subscribeToNotifications error:', err);
+      return () => {};
+    }
+  }
+
+  /**
+   * Mark a notification as read
+   */
+  public async markNotificationRead(studentId: string, notifId: string): Promise<void> {
+    if (!studentId || !notifId) return;
+    try {
+      const notifRef = doc(db, STUDENTS_COLLECTION, studentId, 'notifications', notifId);
+      await updateDoc(notifRef, { read: true });
+    } catch (err) {
+      console.warn('markNotificationRead warning:', err);
     }
   }
 }

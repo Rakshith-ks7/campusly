@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { dataService } from '../services/dataService';
 import { 
   HeartHandshake, 
@@ -116,7 +117,7 @@ export const FriendsHubPage: React.FC = () => {
               className="bg-white border border-[#E5E5E5] hover:border-[#FECDD3] rounded-2xl p-5 shadow-xs transition flex flex-col justify-between space-y-4"
             >
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
+                <Link to={`/profile/${student.id}`} className="flex items-center gap-3 hover:opacity-85 transition">
                   <img
                     src={student.avatar}
                     alt={student.name}
@@ -127,7 +128,7 @@ export const FriendsHubPage: React.FC = () => {
                     <p className="text-xs text-[#666666]">{student.department.split('&')[0]} • {student.year}</p>
                     <p className="text-[11px] text-[#999999]">{student.college}</p>
                   </div>
-                </div>
+                </Link>
 
                 <p className="text-xs text-[#666666] line-clamp-2 leading-relaxed">
                   {student.bio}

@@ -33,6 +33,14 @@ service cloud.firestore {
       match /blocked/{targetUid} {
         allow read, write: if isAuthenticated() && request.auth.uid == studentId;
       }
+
+      // Notifications Subcollection:
+      // Recipient can read, update, or delete their own notifications
+      // Any authenticated user can send a notification to a student
+      match /notifications/{notifId} {
+        allow read, update, delete: if isAuthenticated() && request.auth.uid == studentId;
+        allow create: if isAuthenticated();
+      }
     }
 
     // Conversations collection:

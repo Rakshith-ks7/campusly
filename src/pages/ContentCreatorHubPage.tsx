@@ -225,7 +225,7 @@ export const ContentCreatorHubPage: React.FC = () => {
                   Open to projects
                 </span>
                 <Link
-                  to={`/students?q=${encodeURIComponent(student.name)}`}
+                  to={`/profile/${student.id}`}
                   className="px-3.5 py-1.5 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-medium rounded-lg transition"
                 >
                   Collaborate

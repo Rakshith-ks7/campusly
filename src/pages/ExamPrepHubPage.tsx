@@ -211,7 +211,7 @@ export const ExamPrepHubPage: React.FC = () => {
                   <span>{student.availability}</span>
                 </span>
                 <Link
-                  to={`/students?q=${encodeURIComponent(student.name)}`}
+                  to={`/profile/${student.id}`}
                   className="px-3 py-1 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-medium rounded-lg transition"
                 >
                   Connect
