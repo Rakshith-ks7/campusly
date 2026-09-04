@@ -237,7 +237,14 @@ export const DiscoverPage: React.FC = () => {
                   {searchResults.students.map((s) => (
                     <div key={s.id} className="p-3.5 bg-white border border-[#E5E5E5] hover:border-[#FECDD3] rounded-xl flex items-center justify-between gap-3 shadow-xs transition">
                       <Link to={`/profile/${s.id}`} className="flex items-center gap-2.5 hover:opacity-85 transition">
-                        <img src={s.avatar} alt="" className="w-9 h-9 rounded-full object-cover border border-[#E5E5E5]" />
+                        <img 
+                          src={s.photoURL || s.avatar || '/avatars/avatar-1.png'} 
+                          alt={s.name} 
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).src = '/avatars/avatar-1.png';
+                          }}
+                          className="w-9 h-9 rounded-full object-cover border border-[#E5E5E5]" 
+                        />
                         <div>
                           <h4 className="font-semibold text-xs text-[#262626]">{s.name}</h4>
                           <p className="text-[11px] text-[#666666]">{s.department.split('&')[0]} • {s.year}</p>

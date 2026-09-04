@@ -155,6 +155,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStudentProfile(merged);
     dataService.updateProfile(merged);
     await firestoreService.updateStudentProfile(currentUser.uid, updates);
+
+    // Sync photoURL with Firebase Auth if changed
+    if (updates.photoURL !== undefined || updates.avatar !== undefined) {
+      try {
+        const newPhoto = updates.photoURL || updates.avatar || '';
+        await updateAuthProfile(currentUser, { photoURL: newPhoto });
+      } catch (err) {
+        console.warn('Could not update Firebase Auth photoURL:', err);
+      }
+    }
   };
 
   const isEmailVerified = Boolean(currentUser?.emailVerified);

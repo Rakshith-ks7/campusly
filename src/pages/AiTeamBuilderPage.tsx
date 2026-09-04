@@ -123,7 +123,7 @@ export const AiTeamBuilderPage: React.FC<Props> = () => {
           <button
             onClick={handleGenerate}
             disabled={loading || !prompt.trim()}
-            className="px-5 py-2.5 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-medium rounded-lg transition flex items-center gap-1.5 disabled:opacity-50"
+            className="w-full sm:w-auto px-5 py-2.5 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer min-h-[44px]"
           >
             {loading ? (
               <>
@@ -221,10 +221,13 @@ export const AiTeamBuilderPage: React.FC<Props> = () => {
                   </div>
 
                   {/* Recommended Student Profile */}
-                  <div className="p-3 rounded-lg bg-[#FFF8F8] border border-[#E5E5E5] flex items-center gap-3">
+                  <div className="p-3 rounded-xl bg-[#FFF8F8] border border-[#E5E5E5] flex items-center gap-3">
                     <img
-                      src={student.avatar}
+                      src={student.photoURL || student.avatar || '/avatars/avatar-1.png'}
                       alt={student.name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/avatars/avatar-1.png';
+                      }}
                       className="w-10 h-10 rounded-full object-cover border border-[#E5E5E5] shrink-0"
                     />
                     <div className="flex-1 min-w-0">
@@ -238,7 +241,7 @@ export const AiTeamBuilderPage: React.FC<Props> = () => {
                   </div>
 
                   {/* Natural Language Rationale */}
-                  <div className="text-xs text-[#666666] bg-[#FFF1F2] p-2.5 rounded-lg border border-[#FFE4E6] leading-relaxed flex items-start gap-1.5">
+                  <div className="text-xs text-[#666666] bg-[#FFF1F2] p-2.5 rounded-xl border border-[#FFE4E6] leading-relaxed flex items-start gap-1.5">
                     <Info className="w-3.5 h-3.5 text-[#E63946] shrink-0 mt-0.5" />
                     <div>
                       <strong className="text-[#262626]">Why this person is a good fit: </strong>
@@ -254,7 +257,7 @@ export const AiTeamBuilderPage: React.FC<Props> = () => {
           <div className="pt-2 text-center">
             <button
               onClick={handleAssembleTeam}
-              className="px-5 py-2.5 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-semibold rounded-lg transition inline-flex items-center gap-1.5 shadow-xs"
+              className="w-full sm:w-auto px-6 py-3 bg-[#E63946] hover:bg-[#D62839] text-white text-xs sm:text-sm font-semibold rounded-xl transition inline-flex items-center justify-center gap-1.5 shadow-xs cursor-pointer min-h-[44px]"
             >
               <span>Confirm Roster & Launch Team Workspace</span>
               <ArrowRight className="w-3.5 h-3.5" />

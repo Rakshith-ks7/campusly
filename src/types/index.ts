@@ -20,6 +20,7 @@ export interface StudentProfile {
   name: string;
   email: string;
   avatar: string;
+  photoURL?: string;
   college: string;
   university: string;
   department: string;

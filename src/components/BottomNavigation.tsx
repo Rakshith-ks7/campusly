@@ -42,7 +42,7 @@ export const BottomNavigation: React.FC<Props> = ({
   return (
     <nav 
       aria-label="Mobile Bottom Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5E5E5] px-2 py-1.5 shadow-[0_-2px_10px_rgba(0,0,0,0.04)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E5E5E5] px-2 pt-1 pb-[calc(0.375rem+env(safe-area-inset-bottom,0px))] shadow-[0_-2px_10px_rgba(0,0,0,0.04)] select-none"
     >
       <div className="flex items-center justify-around max-w-lg mx-auto">
         
@@ -50,7 +50,7 @@ export const BottomNavigation: React.FC<Props> = ({
         <Link
           to="/"
           aria-label="Home"
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition ${
+          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition min-h-[44px] min-w-[44px] ${
             isHome ? 'text-[#E63946]' : 'text-[#666666] hover:text-[#262626]'
           }`}
         >
@@ -64,7 +64,7 @@ export const BottomNavigation: React.FC<Props> = ({
         <Link
           to="/discover"
           aria-label="Discover"
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition ${
+          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition min-h-[44px] min-w-[44px] ${
             isDiscover ? 'text-[#E63946]' : 'text-[#666666] hover:text-[#262626]'
           }`}
         >
@@ -78,7 +78,7 @@ export const BottomNavigation: React.FC<Props> = ({
         <button
           onClick={onCreateProjectClick}
           aria-label="Create or Post Project"
-          className="flex flex-col items-center justify-center -mt-3.5 group focus:outline-none"
+          className="flex flex-col items-center justify-center -mt-3.5 group focus:outline-none min-h-[48px] min-w-[48px] cursor-pointer"
         >
           <div className="w-11 h-11 rounded-full bg-[#E63946] text-white flex items-center justify-center shadow-md group-hover:bg-[#D62839] group-active:scale-95 transition-transform">
             <Plus className="w-6 h-6 stroke-[2.5]" />
@@ -92,7 +92,7 @@ export const BottomNavigation: React.FC<Props> = ({
         <Link
           to="/communities"
           aria-label="Communities"
-          className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition ${
+          className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition min-h-[44px] min-w-[44px] ${
             isCommunities ? 'text-[#E63946]' : 'text-[#666666] hover:text-[#262626]'
           }`}
         >
@@ -106,7 +106,7 @@ export const BottomNavigation: React.FC<Props> = ({
         <Link
           to="/messages"
           aria-label="Messages"
-          className={`relative flex flex-col items-center justify-center py-1 px-3 rounded-xl transition ${
+          className={`relative flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition min-h-[44px] min-w-[44px] ${
             isMessages ? 'text-[#E63946]' : 'text-[#666666] hover:text-[#262626]'
           }`}
         >

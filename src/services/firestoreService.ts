@@ -33,7 +33,8 @@ export class FirestoreService {
       id: d.uid || d.id || docId,
       name: d.fullName || d.name || 'Campus Student',
       email: d.email || '',
-      avatar: d.profilePhoto || d.avatar || '/avatars/avatar-1.png',
+      avatar: d.photoURL || d.profilePhoto || d.avatar || '/avatars/avatar-1.png',
+      photoURL: d.photoURL || d.profilePhoto || d.avatar || undefined,
       college: d.college || d.university || 'Campus',
       university: d.university || d.college || 'Campus',
       department: d.branch || d.department || 'Student',
@@ -173,6 +174,13 @@ export class FirestoreService {
     if (updates.avatar) {
       dataToUpdate.profilePhoto = updates.avatar;
     }
+    if (updates.photoURL) {
+      dataToUpdate.photoURL = updates.photoURL;
+      if (!updates.avatar) {
+        dataToUpdate.avatar = updates.photoURL;
+        dataToUpdate.profilePhoto = updates.photoURL;
+      }
+    }
     if (updates.college) {
       dataToUpdate.university = updates.college;
     }
@@ -180,8 +188,43 @@ export class FirestoreService {
     try {
       const docRef = doc(db, STUDENTS_COLLECTION, uid);
       await setDoc(docRef, dataToUpdate, { merge: true });
+
+      // Mirror photoURL to users/{userId}.photoURL as required
+      if (updates.photoURL !== undefined || updates.avatar !== undefined) {
+        const photoToSave = updates.photoURL !== undefined ? updates.photoURL : updates.avatar;
+        const userDocRef = doc(db, 'users', uid);
+        await setDoc(userDocRef, { 
+          uid,
+          photoURL: photoToSave,
+          avatar: photoToSave,
+          updatedAt 
+        }, { merge: true });
+      }
     } catch (err) {
       console.warn(`Firestore updateStudentProfile warning for ${uid}:`, err);
+    }
+  }
+
+  /**
+   * Remove profile photo: resets photoURL and sets avatar back to default
+   */
+  public async removeProfilePhoto(uid: string): Promise<void> {
+    if (!uid) return;
+    const defaultAvatar = '/avatars/avatar-1.png';
+    await this.updateStudentProfile(uid, {
+      avatar: defaultAvatar,
+      photoURL: ''
+    });
+    try {
+      const userDocRef = doc(db, 'users', uid);
+      await setDoc(userDocRef, {
+        uid,
+        photoURL: '',
+        avatar: defaultAvatar,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (err) {
+      console.warn(`removeProfilePhoto users warning for ${uid}:`, err);
     }
   }
 

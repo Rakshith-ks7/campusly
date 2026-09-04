@@ -1,0 +1,25 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Profile Photos:
+    // - Any authenticated student can view profile photos for social discovery
+    // - Only the owner (request.auth.uid == userId) can create, update, or delete their photo
+    // - Enforce max size 5 MB (5 * 1024 * 1024 bytes)
+    // - Enforce valid image MIME types: jpeg, png, webp
+    match /profilePhotos/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null 
+                            && request.auth.uid == userId
+                            && request.resource.size < 5 * 1024 * 1024
+                            && request.resource.contentType.matches('image/(jpeg|jpg|png|webp)');
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default rule for authenticated workspace access
+    match /{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+  }
+}

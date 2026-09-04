@@ -74,7 +74,7 @@ export const StudentCard: React.FC<Props> = ({
         <div className="flex items-start gap-3.5">
           <Link to={`/profile/${student.id}`} className="shrink-0 overflow-hidden rounded-full">
             <img
-              src={imgError || !student.avatar ? fallbackAvatar : student.avatar}
+              src={imgError ? fallbackAvatar : (student.photoURL || student.avatar || fallbackAvatar)}
               alt={student.name}
               onError={() => setImgError(true)}
               className="w-12 h-12 rounded-full object-cover border border-[#E5E5E5] p-0.5 bg-white group-hover:border-[#FECDD3] group-hover:scale-[1.02] transition-transform duration-200"

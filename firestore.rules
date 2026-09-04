@@ -12,6 +12,14 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Users collection:
+    // Any authenticated student can read user profile summaries
+    // Only the owner can create or update their own user document
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
     // Students collection:
     // Any authenticated student can read profiles for community discovery
     // Only the owner can create or update their own profile document

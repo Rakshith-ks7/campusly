@@ -18,9 +18,13 @@ import {
   Rocket,
   ArrowRight,
   UserCheck,
-  UserPlus
+  UserPlus,
+  Upload,
+  Trash2,
+  Sparkles
 } from 'lucide-react';
 import { AvatarPickerModal } from '../components/AvatarPickerModal';
+import { ProfilePhotoUploadModal } from '../components/ProfilePhotoUploadModal';
 import { followService } from '../services/followService';
 
 interface Props {
@@ -63,6 +67,7 @@ export const ProfilePage: React.FC<Props> = ({ currentUser: propUser, onProfileU
   // Follow stats for own profile
   const [followStats, setFollowStats] = useState({ followersCount: 0, followingCount: 0 });
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
 
   // Sync state when own currentUser changes
   useEffect(() => {
@@ -153,9 +158,35 @@ export const ProfilePage: React.FC<Props> = ({ currentUser: propUser, onProfileU
 
   const handleAvatarSelected = (newAvatarUrl: string) => {
     if (!currentUser) return;
-    const updated = { ...currentUser, avatar: newAvatarUrl };
+    const updated = { ...currentUser, avatar: newAvatarUrl, photoURL: newAvatarUrl };
     dataService.updateProfile(updated);
     updateProfileData(updated);
+    onProfileUpdated(updated);
+  };
+
+  const handlePhotoUploaded = (downloadUrl: string) => {
+    if (!currentUser) return;
+    const updated: StudentProfile = { 
+      ...currentUser, 
+      avatar: downloadUrl, 
+      photoURL: downloadUrl 
+    };
+    dataService.updateProfile(updated);
+    updateProfileData(updated);
+    onProfileUpdated(updated);
+  };
+
+  const handlePhotoRemoved = () => {
+    if (!currentUser) return;
+    const defaultAvatar = '/avatars/avatar-1.png';
+    const updated: StudentProfile = { 
+      ...currentUser, 
+      avatar: defaultAvatar, 
+      photoURL: '' 
+    };
+    dataService.updateProfile(updated);
+    updateProfileData(updated);
+    firestoreService.removeProfilePhoto(currentUser.id);
     onProfileUpdated(updated);
   };
 
@@ -277,8 +308,8 @@ export const ProfilePage: React.FC<Props> = ({ currentUser: propUser, onProfileU
             {isOwnProfile ? (
               <div 
                 className="relative group cursor-pointer shrink-0"
-                onClick={() => setAvatarModalOpen(true)}
-                title="Click to choose a new avatar"
+                onClick={() => setPhotoModalOpen(true)}
+                title="Click to upload profile photo"
               >
                 <img
                   src={activeStudent.avatar}
@@ -287,7 +318,7 @@ export const ProfilePage: React.FC<Props> = ({ currentUser: propUser, onProfileU
                 />
                 <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition text-[10px] font-semibold">
                   <Camera className="w-5 h-5 mb-0.5" />
-                  <span>Change</span>
+                  <span>Upload</span>
                 </div>
               </div>
             ) : (
@@ -338,36 +369,64 @@ export const ProfilePage: React.FC<Props> = ({ currentUser: propUser, onProfileU
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 self-stretch sm:self-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             {isOwnProfile ? (
               <>
+                {/* Add / Change Profile Photo Button */}
+                <button
+                  type="button"
+                  onClick={() => setPhotoModalOpen(true)}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-[#FFF1F2] hover:bg-[#FFE4E6] text-[#E63946] text-xs font-semibold px-3.5 py-2.5 rounded-xl transition cursor-pointer min-h-[44px]"
+                  title="Upload or change profile photo"
+                >
+                  <Camera className="w-4 h-4" />
+                  <span>
+                    {currentUser?.photoURL && !currentUser.photoURL.startsWith('/avatars/')
+                      ? 'Change Photo'
+                      : 'Add Profile Photo'}
+                  </span>
+                </button>
+
+                {/* Remove Photo Button (if custom photo is active) */}
+                {currentUser?.photoURL && !currentUser.photoURL.startsWith('/avatars/') && (
+                  <button
+                    type="button"
+                    onClick={handlePhotoRemoved}
+                    className="p-2.5 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 rounded-xl transition cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    title="Remove photo and return to default avatar"
+                    aria-label="Remove profile photo"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+
                 <Link
                   to="/messages"
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-[#FFF1F2] hover:bg-[#FFE4E6] text-[#E63946] text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-white border border-[#E5E5E5] hover:bg-[#FFF8F8] text-[#262626] text-xs font-semibold px-3.5 py-2.5 rounded-xl transition cursor-pointer min-h-[44px]"
                 >
-                  <MessageSquare className="w-4 h-4" />
+                  <MessageSquare className="w-4 h-4 text-[#666666]" />
                   <span>Messages</span>
                 </Link>
 
                 {!isEditing ? (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-white border border-[#E5E5E5] hover:border-[#FECDD3] hover:bg-[#FFF8F8] text-[#262626] text-xs font-semibold px-4 py-2.5 rounded-xl transition cursor-pointer"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 bg-white border border-[#E5E5E5] hover:border-[#FECDD3] hover:bg-[#FFF8F8] text-[#262626] text-xs font-semibold px-3.5 py-2.5 rounded-xl transition cursor-pointer min-h-[44px]"
                   >
                     <Edit3 className="w-4 h-4 text-[#E63946]" />
                     <span>Edit Profile</span>
                   </button>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-3.5 py-2 border border-[#E5E5E5] rounded-xl text-xs font-medium text-[#666666] hover:bg-[#FFF8F8]"
+                      className="flex-1 sm:flex-none px-3.5 py-2.5 border border-[#E5E5E5] rounded-xl text-xs font-medium text-[#666666] hover:bg-[#FFF8F8] min-h-[44px]"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSave}
-                      className="flex items-center gap-1 px-4 py-2 bg-[#E63946] hover:bg-[#D62839] text-white rounded-xl text-xs font-semibold shadow-xs"
+                      className="flex-1 sm:flex-none flex items-center justify-center gap-1 px-4 py-2.5 bg-[#E63946] hover:bg-[#D62839] text-white rounded-xl text-xs font-semibold shadow-xs min-h-[44px]"
                     >
                       <Save className="w-4 h-4" />
                       <span>Save</span>
@@ -516,6 +575,44 @@ export const ProfilePage: React.FC<Props> = ({ currentUser: propUser, onProfileU
         {/* Edit Mode Inputs (own profile only) */}
         {isOwnProfile && isEditing && (
           <div className="mt-6 pt-6 border-t border-[#E5E5E5] grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            {/* Profile Photo Controls */}
+            <div className="sm:col-span-2 p-3.5 bg-[#FFF8F8] border border-[#E5E5E5] rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <img
+                  src={currentUser.avatar}
+                  alt="Profile"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[#FFE4E6] p-0.5 bg-white"
+                />
+                <div>
+                  <p className="text-xs font-bold text-[#262626]">Profile Photo</p>
+                  <p className="text-[11px] text-[#666666]">
+                    Upload a custom JPG/PNG/WEBP photo or choose an illustrated avatar
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setPhotoModalOpen(true)}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-semibold rounded-xl transition shadow-xs cursor-pointer min-h-[38px]"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Upload Photo</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAvatarModalOpen(true)}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white border border-[#E5E5E5] hover:bg-[#FFF1F2] text-[#262626] text-xs font-semibold rounded-xl transition cursor-pointer min-h-[38px]"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Avatars</span>
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="block text-xs font-medium text-[#262626] mb-1">Full Name</label>
               <input
@@ -816,6 +913,18 @@ export const ProfilePage: React.FC<Props> = ({ currentUser: propUser, onProfileU
           onClose={() => setAvatarModalOpen(false)}
           currentAvatar={currentUser.avatar}
           onSelectAvatar={handleAvatarSelected}
+        />
+      )}
+
+      {/* Profile Photo Upload Modal (own profile only) */}
+      {isOwnProfile && currentUser && (
+        <ProfilePhotoUploadModal
+          isOpen={photoModalOpen}
+          onClose={() => setPhotoModalOpen(false)}
+          userId={currentUser.id}
+          currentPhotoUrl={currentUser.photoURL || currentUser.avatar}
+          onPhotoUploaded={handlePhotoUploaded}
+          onPhotoRemoved={handlePhotoRemoved}
         />
       )}
     </div>

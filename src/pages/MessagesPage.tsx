@@ -311,8 +311,8 @@ export const MessagesPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 h-[calc(100vh-120px)] min-h-[580px]">
-      <div className="bg-white border border-[#E5E5E5] rounded-3xl h-full shadow-xs overflow-hidden flex">
+    <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-2 sm:py-6 h-[calc(100dvh-130px)] md:h-[calc(100vh-120px)] min-h-[480px]">
+      <div className="bg-white border border-[#E5E5E5] rounded-2xl sm:rounded-3xl h-full shadow-xs overflow-hidden flex">
         
         {/* ======================================================== */}
         {/* LEFT SIDEBAR: CONVERSATIONS & REQUESTS LIST */}
@@ -747,7 +747,7 @@ export const MessagesPage: React.FC = () => {
                       <button
                         type="submit"
                         disabled={!messageText.trim() || sending}
-                        className="p-2.5 bg-[#E63946] hover:bg-[#D62839] disabled:opacity-40 text-white rounded-xl transition shadow-xs shrink-0 flex items-center justify-center"
+                        className="p-2.5 bg-[#E63946] hover:bg-[#D62839] disabled:opacity-40 text-white rounded-xl transition shadow-xs shrink-0 flex items-center justify-center min-w-[44px] min-h-[44px] cursor-pointer"
                         title="Send message"
                       >
                         <Send className="w-4 h-4" />

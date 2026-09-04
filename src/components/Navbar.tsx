@@ -226,11 +226,14 @@ export const Navbar: React.FC<Props> = ({
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
                     aria-label="Profile and Settings"
-                    className="flex items-center gap-2 p-1 rounded-xl border border-[#E5E5E5] hover:border-[#FECDD3] hover:bg-[#FFF8F8] transition cursor-pointer"
+                    className="flex items-center gap-2 p-1 sm:p-1.5 rounded-xl border border-[#E5E5E5] hover:border-[#FECDD3] hover:bg-[#FFF8F8] transition cursor-pointer min-h-[40px]"
                   >
                     <img
-                      src={activeUser.avatar}
+                      src={activeUser.photoURL || activeUser.avatar || '/avatars/avatar-1.png'}
                       alt={activeUser.name}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/avatars/avatar-1.png';
+                      }}
                       className="w-8 h-8 rounded-full object-cover border border-[#E5E5E5]"
                     />
                     <div className="text-left hidden xl:block pr-1">

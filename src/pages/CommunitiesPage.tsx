@@ -66,17 +66,17 @@ export const CommunitiesPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto shrink-0">
           <button
             onClick={() => setIsCreateHubOpen(true)}
-            className="px-4 py-2 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-semibold rounded-lg transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2.5 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-semibold rounded-xl transition shadow-xs flex items-center justify-center gap-1.5 cursor-pointer min-h-[44px]"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create a Hub</span>
           </button>
           <Link
             to="/discover"
-            className="px-4 py-2 bg-white hover:bg-[#FFF1F2] text-[#E63946] border border-[#E5E5E5] hover:border-[#FECDD3] text-xs font-medium rounded-lg transition shrink-0"
+            className="px-4 py-2.5 bg-white hover:bg-[#FFF1F2] text-[#E63946] border border-[#E5E5E5] hover:border-[#FECDD3] text-xs font-semibold rounded-xl transition flex items-center justify-center min-h-[44px] shrink-0"
           >
             Explore Campus Hubs →
           </Link>

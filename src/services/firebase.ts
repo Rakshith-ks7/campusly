@@ -33,6 +33,13 @@ import {
   limit,
   serverTimestamp
 } from 'firebase/firestore';
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject
+} from 'firebase/storage';
 
 export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCrQIrhMNlNjjwfRln9_jx7hYts8shc7mo",
@@ -53,6 +60,7 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // Analytics (safe client check)
 export let analytics: ReturnType<typeof getAnalytics> | null = null;
@@ -115,6 +123,10 @@ export {
   onSnapshot,
   orderBy,
   limit,
-  serverTimestamp
+  serverTimestamp,
+  storageRef,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject
 };
 export type { FirebaseUser };

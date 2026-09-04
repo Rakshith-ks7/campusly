@@ -12,9 +12,12 @@ import {
   User, 
   Plus, 
   X,
-  Camera
+  Camera,
+  Upload,
+  Trash2
 } from 'lucide-react';
 import { AvatarPickerModal, AVAILABLE_AVATARS } from '../components/AvatarPickerModal';
+import { ProfilePhotoUploadModal } from '../components/ProfilePhotoUploadModal';
 
 export const OnboardingPage: React.FC = () => {
   const { currentUser, studentProfile, updateProfileData } = useAuth();
@@ -24,6 +27,7 @@ export const OnboardingPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [avatar, setAvatar] = useState(studentProfile?.avatar || '/avatars/avatar-1.png');
   const [avatarModalOpen, setAvatarModalOpen] = useState(false);
+  const [photoModalOpen, setPhotoModalOpen] = useState(false);
 
   // Step 1: Academic Basics
   const [fullName, setFullName] = useState(studentProfile?.name || currentUser?.displayName || '');
@@ -177,58 +181,92 @@ export const OnboardingPage: React.FC = () => {
 
             <div className="space-y-3.5">
               
-              {/* Avatar Selection Widget */}
-              <div className="p-4 rounded-xl bg-[#FFF8F8] border border-[#E5E5E5] space-y-2.5">
+              {/* Profile Photo / Avatar Selection Widget */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#FFF8F8] border border-[#E5E5E5] space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-[#262626]">
-                    Choose Your Profile Avatar
+                  <label className="text-xs font-bold text-[#262626]">
+                    Your Profile Photo
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setAvatarModalOpen(true)}
-                    className="text-xs text-[#E63946] hover:underline font-medium"
-                  >
-                    View all 28 avatars →
-                  </button>
+                  <span className="text-[11px] text-[#666666]">
+                    Upload photo or pick avatar
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  {/* Current Preview with clickable upload overlay */}
                   <div 
                     className="relative group cursor-pointer shrink-0"
-                    onClick={() => setAvatarModalOpen(true)}
-                    title="Click to change avatar"
+                    onClick={() => setPhotoModalOpen(true)}
+                    title="Click to upload profile photo"
                   >
                     <img
                       src={avatar}
-                      alt="Selected Avatar"
-                      className="w-14 h-14 rounded-full object-cover border-2 border-[#E63946] p-0.5 bg-white shadow-xs group-hover:opacity-90 transition"
+                      alt="Selected Profile"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-[#E63946] p-0.5 bg-white shadow-xs group-hover:opacity-90 transition"
                     />
-                    <div className="absolute inset-0 rounded-full bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition">
-                      <Camera className="w-4 h-4" />
+                    <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition text-[9px] font-semibold">
+                      <Camera className="w-4 h-4 mb-0.5" />
+                      <span>Upload</span>
                     </div>
                   </div>
 
-                  {/* Quick Avatar Strip */}
-                  <div className="flex items-center gap-2 overflow-x-auto py-1">
-                    {AVAILABLE_AVATARS.slice(0, 6).map((av) => (
+                  {/* Action buttons */}
+                  <div className="flex-1 space-y-2 w-full">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <button
-                        key={av}
                         type="button"
-                        onClick={() => setAvatar(av)}
-                        className={`w-9 h-9 rounded-full shrink-0 border-2 transition hover:scale-105 ${
-                          avatar === av ? 'border-[#E63946] ring-2 ring-[#FFE4E6]' : 'border-[#E5E5E5]'
-                        }`}
+                        onClick={() => setPhotoModalOpen(true)}
+                        className="flex-1 sm:flex-none px-4 py-2 bg-[#E63946] hover:bg-[#D62839] text-white text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs cursor-pointer min-h-[40px]"
                       >
-                        <img src={av} alt="avatar option" className="w-full h-full object-contain rounded-full" />
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>{avatar.startsWith('http') ? 'Change Photo' : 'Upload Profile Photo'}</span>
                       </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => setAvatarModalOpen(true)}
-                      className="h-9 px-2.5 rounded-full bg-white border border-[#E5E5E5] text-[11px] font-medium text-[#666666] hover:text-[#E63946] hover:border-[#FECDD3] shrink-0"
-                    >
-                      +22 more
-                    </button>
+
+                      {avatar.startsWith('http') && (
+                        <button
+                          type="button"
+                          onClick={() => setAvatar('/avatars/avatar-1.png')}
+                          className="px-3 py-2 bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-semibold rounded-xl transition flex items-center justify-center gap-1 cursor-pointer min-h-[40px]"
+                          title="Remove custom photo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Remove</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setAvatarModalOpen(true)}
+                        className="flex-1 sm:flex-none px-3.5 py-2 bg-white border border-[#E5E5E5] hover:bg-[#FFF8F8] text-[#262626] text-xs font-medium rounded-xl transition flex items-center justify-center gap-1 cursor-pointer min-h-[40px]"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Pick Avatar</span>
+                      </button>
+                    </div>
+
+                    {/* Quick Avatar Strip */}
+                    <div className="flex items-center gap-2 overflow-x-auto py-1">
+                      <span className="text-[11px] text-[#666666] shrink-0 font-medium">Or quick pick:</span>
+                      {AVAILABLE_AVATARS.slice(0, 5).map((av) => (
+                        <button
+                          key={av}
+                          type="button"
+                          onClick={() => setAvatar(av)}
+                          className={`w-8 h-8 rounded-full shrink-0 border-2 transition hover:scale-105 ${
+                            avatar === av ? 'border-[#E63946] ring-2 ring-[#FFE4E6]' : 'border-[#E5E5E5]'
+                          }`}
+                        >
+                          <img src={av} alt="avatar option" className="w-full h-full object-contain rounded-full" />
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setAvatarModalOpen(true)}
+                        className="h-8 px-2 rounded-full bg-white border border-[#E5E5E5] text-[10px] font-medium text-[#666666] hover:text-[#E63946] hover:border-[#FECDD3] shrink-0"
+                      >
+                        +23 more
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -522,6 +560,18 @@ export const OnboardingPage: React.FC = () => {
         currentAvatar={avatar}
         onSelectAvatar={setAvatar}
       />
+
+      {/* Profile Photo Upload Modal */}
+      {currentUser && (
+        <ProfilePhotoUploadModal
+          isOpen={photoModalOpen}
+          onClose={() => setPhotoModalOpen(false)}
+          userId={currentUser.uid}
+          currentPhotoUrl={avatar}
+          onPhotoUploaded={(url) => setAvatar(url)}
+          onPhotoRemoved={() => setAvatar('/avatars/avatar-1.png')}
+        />
+      )}
     </div>
   );
 };

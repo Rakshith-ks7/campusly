@@ -92,17 +92,17 @@ export const CreateProjectModal: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in">
-      <div className="bg-white border border-[#E5E5E5] rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in">
+      <div className="bg-white border border-[#E5E5E5] rounded-2xl sm:rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-4 sm:p-6">
         
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b border-[#E5E5E5]">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#FFF1F2] flex items-center justify-center text-[#E63946]">
+            <div className="w-8 h-8 rounded-xl bg-[#FFF1F2] border border-[#FFE4E6] flex items-center justify-center text-[#E63946] shrink-0">
               <FolderPlus className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-heading font-semibold text-lg text-[#262626]">
+              <h2 className="font-heading font-bold text-base sm:text-lg text-[#262626]">
                 Post a Project
               </h2>
               <p className="text-xs text-[#666666]">
@@ -112,7 +112,8 @@ export const CreateProjectModal: React.FC<Props> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-[#666666] hover:text-[#262626] p-1"
+            aria-label="Close modal"
+            className="text-[#999999] hover:text-[#262626] p-2 rounded-xl hover:bg-[#FFF8F8] transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -324,17 +325,17 @@ export const CreateProjectModal: React.FC<Props> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-3 border-t border-[#E5E5E5] flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#E5E5E5] flex flex-col sm:flex-row justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs text-[#666666] hover:text-[#262626] bg-white border border-[#E5E5E5] rounded-lg"
+              className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-[#666666] hover:text-[#262626] bg-white border border-[#E5E5E5] hover:bg-[#FFF8F8] rounded-xl transition cursor-pointer min-h-[44px] sm:min-h-[40px]"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-xs font-medium text-white bg-[#E63946] hover:bg-[#D62839] rounded-lg transition"
+              className="w-full sm:w-auto px-6 py-2.5 text-xs font-semibold text-white bg-[#E63946] hover:bg-[#D62839] rounded-xl transition shadow-xs cursor-pointer min-h-[44px] sm:min-h-[40px]"
             >
               Publish Project
             </button>
